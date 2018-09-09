@@ -90,6 +90,7 @@ int main(){
 			printf("\n                       |======================================|\n");
 		}
 	}
+	free(particoes);
 	return 0;
 }
 // acha o registro com menor codigo
@@ -124,6 +125,8 @@ void salva(cliente *client, FILE *out) {
     fwrite(&client->codCliente, sizeof(int), 1, out);
 	fwrite(client->nome, sizeof(char), sizeof(client->nome), out);
 	fwrite(client->dataNascimento, sizeof(char), sizeof(client->dataNascimento), out);
+	free(client);
+	client = NULL;
 }
 // imprime um registros de cliente no arquivo txt de entrada [log]
 void imprime_cliente(cliente* cliente,FILE* log)
@@ -136,18 +139,6 @@ void imprime_cliente(cliente* cliente,FILE* log)
     fprintf(log,"\nData de nascimento do cliente: ");
     fprintf(log,"%s", cliente->dataNascimento);
     fprintf(log,"\n**********************************************\n");
-}
-// insere um registro no reservatorio
-void insereReservatorio(cliente* reg,FILE* reservatorio){
-	salva(reg,reservatorio);
-}
-//insere um registro no vetor de registros na memoria
-void insereMemoria(cliente** reg,int indice,cliente* Ftemp){
-	reg[indice] = Ftemp;
-}
-// preenche uma posicao do vet de registros com NULL
-void nullMemory(cliente** reg,int indice){
-	reg[indice] = NULL;
 }
 // le um registro de cliente do arq de entrada
 cliente* le_cliente(FILE* in){
@@ -167,7 +158,8 @@ FILE** selecao_natural(FILE** particao,int* contParticoes){
 	FILE* reservatorio;
 
 	cliente* Ftemp; // guardara um registro temporario
- 	cliente* reg[M]; // guardara M[nesse caso 6] registros do arquivo na memoria
+ 	cliente** reg;
+ 	reg = (cliente**)malloc(sizeof(cliente*)*M); // guardara M[nesse caso 6] registros do arquivo na memoria
 	
 	char nome[20];
 	char regName[50];
@@ -190,14 +182,15 @@ FILE** selecao_natural(FILE** particao,int* contParticoes){
 	
 	registros = fopen(newName,"r+b"); // abrindo arquivo de registros
 	reservatorio = fopen("reservatorio.dat","w+b"); // abre o arquivo reservatorio
+	
+	cliente ant;
 
 	// lendo 8 registros, admitindo que a maquina so consegue ler 8 registros por vez
 	for(int i=0;i<M;i++){
 		reg[i] = le_cliente(registros);
 	}
 	while(running){
-		cliente* ant = (cliente*)malloc(sizeof(cliente));
-		ant->codCliente = -1;
+		ant.codCliente = -1;
 		espaco = M;
 		// enquanto ha espaco no reservatorio, realiza operacoes em uma mesma particao
 		while(espaco >= 0){
@@ -208,43 +201,48 @@ FILE** selecao_natural(FILE** particao,int* contParticoes){
 				*contParticoes += 1; 
 				particao[contador] = fopen(nome,"w+b");
 			} // abre arquivo de particao no contador com nome atualizado
-			if(ant->codCliente != reg[indice]->codCliente)salva(reg[indice],particao[contador]); // salvo o registro de menor valor na particao aberta atual
-			ant = reg[indice];
+			ant = *(reg[indice]);
+			if(ant.codCliente != reg[indice]->codCliente)
+			{
+				salva(reg[indice],particao[contador]); // salvo o registro de menor valor na particao aberta atual
+				reg[indice] = NULL;
+			}
 			if(set==0)
 			{
-
 				Ftemp = le_cliente(registros); // carrega o proximo registro para um registro temporario
 				int option = decisao(Ftemp,menor,espaco);
 
 				switch(option){
-					case 1: nullMemory(reg,indice); // coloca null no reg[indice]
-							set = 1;
+					case 1: 
+						free(reg[indice]);
+						reg[indice]=NULL; // coloca null no reg[indice]
+						set = 1;
 						break; 
 					
-					case 2:	insereReservatorio(Ftemp,reservatorio); // salva Ftemp no reservatorio
-							espaco--;
+					case 2:
+						salva(Ftemp,reservatorio); // salva Ftemp no reservatorio
+						Ftemp = NULL;
+						espaco--;
 						break;
 					
-					case 3: insereMemoria(reg,indice,Ftemp); // insere o registro no array de registros pois o 
-						break;															// valor dele eh maior do que o menor anterior
-
-				}// se espaco eh zero, entao reservatorio encheu
+					case 3:
+						reg[indice] = Ftemp; // insere o registro no array de registros pois o 
+						break;
+				}
+				// se espaco eh zero, entao reservatorio encheu
 				if(espaco == 0){
 					int controle=1;
-
 					while(controle)
 					{
 						controle = 0;
-						reg[indice] = NULL;
 
 						indice = achaMenor(reg,&menor);
 
 						if(indice >= 0){
 							salva(reg[indice],particao[contador]);
-							controle = 1;
 							reg[indice] = NULL;
+							controle = 1;
 						} 
-						
 					}
 					
 					fclose(particao[contador]); // fecha a particao pois o reservatorio encheu
@@ -253,11 +251,10 @@ FILE** selecao_natural(FILE** particao,int* contParticoes){
 					rewind(reservatorio);
 
 					// carrega os M registros salvos do reservatorio, na memoria
-
-
 					for(int i=0;i<M;i++){
 						reg[i] = le_cliente(reservatorio);
 					}
+
 					reservatorio = fopen("reservatorio.dat","w+b");
 					nome[8] += 1; // altera o nome de particao0.dat para particao1.dat para criar um novo arquivo de particao
 					if(particao[contador] == NULL){ 
@@ -267,7 +264,8 @@ FILE** selecao_natural(FILE** particao,int* contParticoes){
 					espaco = -1;
 				}
 			}
-			if(set == 1){ 
+			if(set == 1)
+			{ 
 				int controle=1;
 				indice = achaMenor(reg,&menor);
 				while(controle)
@@ -278,8 +276,8 @@ FILE** selecao_natural(FILE** particao,int* contParticoes){
 
 					if(indice >= 0){
 						salva(reg[indice],particao[contador]);
-						controle = 1;
 						reg[indice] = NULL;
+						controle = 1;
 					} 
 				}
 				
@@ -304,8 +302,8 @@ FILE** selecao_natural(FILE** particao,int* contParticoes){
 						indice = achaMenor(reg,&menor);
 						if(indice >= 0){
 							salva(reg[indice],particao[contador]);
-							controle = 1;
 							reg[indice] = NULL;
+							controle = 1;
 						} 
 					}
 					printf("contador:%d\n",contador);
@@ -314,11 +312,9 @@ FILE** selecao_natural(FILE** particao,int* contParticoes){
 				running=0;
 				espaco=-1;	
 			}
-			
 		}
 	}
-	
 	fclose(reservatorio);
-	
+	free(reg);
 	return particao;
 }
