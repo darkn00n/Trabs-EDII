@@ -19,9 +19,6 @@ int achaMenor(cliente**,int*);
 int decisao(cliente*,int,int);
 void salva(cliente*, FILE*);
 void imprime_cliente(cliente*,FILE*);
-void insereReservatorio(cliente*,FILE* reservatorio);
-void insereMemoria(cliente**,int,cliente*);
-void nullMemory(cliente**,int);
 cliente* le_cliente(FILE*);
 FILE** selecao_natural(FILE**,int*);
 
