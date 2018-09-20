@@ -12,7 +12,7 @@ typedef struct Cliente
 {
 	int codCliente;
 	char nome[100];
-	cliente* prox;
+	int prox;
 	int status;
 }cliente;
 

@@ -1,9 +1,8 @@
 #pragma once
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-
+#include "clientes.c"
 //Vitor Pinheiro David
 //Douglas Custodio de Araujo
 //Jose Lucas Alves gomes
@@ -17,3 +16,4 @@ int hash(int);
 // inicializa o arquivo hash de ponteiros pra listas
 void inicializa(FILE*);
 
+void insere(cliente*,FILE*,FILE*);

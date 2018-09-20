@@ -1,15 +1,16 @@
-#include "banco.c"
+#include "clientes.c"
+#include "hash.c"
 
 //Vitor Pinheiro David
 //Douglas Custodio de Araujo
 //Jose Lucas Alves gomes
 
-int main(int argc, char const *argv[])
+int main()
 {
 	int entrar=1,acao=0;
 
-	FILE* hashFile = fopen("tabHash.dat","w+b");
-	FILE* clientes = fopen("clientes.dat","w+b");
+	FILE* hashFile = fopen("tabHash.dat","r+b");
+	FILE* clientes = fopen("clientes.dat","r+b");
 
 	while(entrar)
 	{
@@ -19,13 +20,13 @@ int main(int argc, char const *argv[])
 		switch(acao)
 		{
 			case 1:
-				adiciona_cliente(cria_cliente(),clientes);
+				insere(cria_cliente(),hashFile,clientes);
 				break;
 			case 2:
-				ler_clientes(clientes);
+				//ler_clientes(clientes);
 				break;
 			case 3:
-				remove_cliente(clientes);
+				//remove_cliente(clientes);
 				break;
 			case 4:
 				entrar=0;
