@@ -14,7 +14,7 @@ int main()
 
 	while(entrar)
 	{
-		printf("1 para registrar um cliente\n2 para remover um cliente\n3 para pesquisar um cliente\n");
+		printf("1 para registrar um cliente\n2 para ver clientes\n3 para pesquisar um cliente\n4 para sair do programa\n");
 		scanf("%d",&acao);
 		getchar();
 		switch(acao)
@@ -23,13 +23,16 @@ int main()
 				insere(cria_cliente(),hashFile,clientes);
 				break;
 			case 2:
-				//ler_clientes(clientes);
+				ler_clientes(clientes);
 				break;
 			case 3:
 				//remove_cliente(clientes);
 				break;
 			case 4:
 				entrar=0;
+				break;
+			case 5:
+				inicializa(hashFile);
 				break;
 			default:
 				printf("caso invalido tente novamente\n");

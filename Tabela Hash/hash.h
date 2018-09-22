@@ -1,8 +1,6 @@
 #pragma once
 
-#include <stdio.h>
-#include <string.h>
-#include "clientes.c"
+#include "clientes.h"
 //Vitor Pinheiro David
 //Douglas Custodio de Araujo
 //Jose Lucas Alves gomes

@@ -14,15 +14,46 @@ cliente* cria_cliente(){
 	strcpy(nome,"Tabela Hash");
 	scanf("%d",&cod);
 
-	nome[strcspn(nome,"\n")] = 0;
+	//nome[strcspn(nome,"\n")] = 0;
 
 	//coloca os atributos recebidos
 	strcpy(client->nome,nome);
 	client->codCliente = cod;
-	cliente->prox = NULL;
-	cliente->status = 1;
+	client->prox = -1;
+	client->status = 0;
 
 	return client;
+}
+void ler_clientes(FILE* in)
+{
+	rewind(in);
+
+	cliente* aux = NULL;
+
+	for (int i = 0;i>-1; i++)
+	{
+		aux = le_cliente(in);
+		if(aux != NULL){
+			imprime_cliente(aux);
+			free(aux);
+		}
+		else{
+			break;
+		}
+	}
+}
+void imprime_cliente(cliente* client)
+{
+	printf("**********************************************");
+    printf("\nCodigo do cliente: ");
+    printf("%d", client->codCliente);
+    printf("\nNome do cliente: ");
+    printf("%s", client->nome);
+    printf("\nProx do cliente: ");
+    printf("%d\n", client->prox);
+    printf("\nStatus do cliente: ");
+    printf("%d\n", client->status);
+    printf("\n**********************************************\n");
 }
 void adiciona_cliente(cliente* client,FILE* out)
 {
@@ -33,6 +64,7 @@ void adiciona_cliente(cliente* client,FILE* out)
     fwrite(&client->prox,sizeof(int),1,out);
     fwrite(&client->status,sizeof(int),1,out);
     free(client);
+    fflush(out);
 }
 void altera_status(FILE* file)
 {
@@ -48,11 +80,11 @@ int tamanho_cliente()
          + sizeof(int);//status
 }
 cliente* le_cliente(FILE* clientesDat){
+
 	cliente* temp = (cliente*)malloc(sizeof(cliente));
 
-
-	if(0 >= fread(&temp->codCliente, sizeof(int), 1, clientesDat)){
-		fread(temp->nome, sizeof(char), sizeof(client->nome), clientesDat);
+	if(fread(&temp->codCliente, sizeof(int), 1, clientesDat) > 0){
+		fread(temp->nome, sizeof(char), sizeof(temp->nome), clientesDat);
 	    fread(&temp->prox,sizeof(int),1,clientesDat);
 	    fread(&temp->status,sizeof(int),1,clientesDat);
 	}
@@ -64,10 +96,15 @@ cliente* le_cliente(FILE* clientesDat){
 }
 int le_status(FILE* clientesDat){
 	int status = -1;
+	int cod = 0;
 
-	fseek(file,tamanho_cliente() - sizeof(int),SEEK_CUR);
+	if(fread(&cod,sizeof(int),1,clientesDat))
+	{
+		fseek(clientesDat,tamanho_cliente() - 2*sizeof(int),SEEK_CUR);
 
-	fread(&status,sizeof(int),1,clientesDat);
+		fread(&status,sizeof(int),1,clientesDat);
+	}
+		//if(status == -1) puts("oi");
 
 	return status;
 }

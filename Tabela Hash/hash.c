@@ -1,5 +1,4 @@
-#include "hash.c"
-#include "clientes.c"
+#include "hash.h"
 
 #define M 7 // define o tamanho da tabela
 
@@ -9,7 +8,7 @@
 
 int hash(int codigo){
 
-	return cod % M;
+	return codigo % M;
 }
 
 void inicializa(FILE* hashFile){
@@ -24,6 +23,7 @@ void insere(cliente* cliente,FILE* tabHash,FILE* clientesDat){
 	int cursor; // cursor para posicionar na tabHash
 	int listFirst; // para verificar se na posicao achada ja tem uma lista ou esta vazia
 	int posicao = 0; // contabiliza quantos registros foram lidos para atualizar tabela Hash
+	int temp = 0;
 
 	cursor = sizeof(int)*hash(cliente->codCliente);
 
@@ -31,30 +31,30 @@ void insere(cliente* cliente,FILE* tabHash,FILE* clientesDat){
 
 	fread(&listFirst,sizeof(int),1,tabHash);
 
+	rewind(clientesDat);
+
 	if(listFirst == -1){
-		rewind(clientesDat);
-		int temp = 0;
-
 		temp = le_status(clientesDat);
-
+		printf("fala seu merda:%d\n",temp);
 		if(temp == -1){
 			adiciona_cliente(cliente,clientesDat);
+			puts("kk eai");
 		}
 		else{
-			
 			while(temp == 0){
 				temp = le_status(clientesDat);
+				printf("%d\n",temp);
 				posicao++;
 			}
-			fseek(clientesDat,-tamanho_cliente(),SEEK_CUR);
+			if(temp == 1){
+				fseek(clientesDat,-tamanho_cliente(),SEEK_CUR);
+				puts("kk deu merda");
+			}
 
 			adiciona_cliente(cliente,clientesDat);
 		}
 	}
 	else{
-		rewind(clientesDat);
-		int temp = 0;
-
 		cliente->prox = listFirst;
 
 		temp = le_status(clientesDat);
@@ -67,7 +67,7 @@ void insere(cliente* cliente,FILE* tabHash,FILE* clientesDat){
 				temp = le_status(clientesDat);
 				posicao++;
 			}
-			fseek(clientesDat,-tamanho_cliente(),SEEK_CUR);
+			if(temp == 1) fseek(clientesDat,-tamanho_cliente(),SEEK_CUR);
 
 			adiciona_cliente(cliente,clientesDat);
 		}	
@@ -76,6 +76,9 @@ void insere(cliente* cliente,FILE* tabHash,FILE* clientesDat){
 	fseek(tabHash,cursor,SEEK_SET);
 
 	fwrite(&posicao,sizeof(int),1,tabHash);
+
+	//fflush(tabHash);
+	//fflush(clientesDat);
 }
 
 
