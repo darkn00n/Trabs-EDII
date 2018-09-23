@@ -7,7 +7,7 @@
 
 int main()
 {
-	int entrar=1,acao=0;
+	int entrar=1,acao=0,cod;
 
 	FILE* hashFile = fopen("tabHash.dat","r+b");
 	FILE* clientes = fopen("clientes.dat","r+b");
@@ -26,13 +26,17 @@ int main()
 				ler_clientes(clientes);
 				break;
 			case 3:
-				//remove_cliente(clientes);
+				printf("Digite o codigo a ser buscado.\n");
+				scanf("%d",&cod);
+				busca(cod,hashFile,clientes);
 				break;
 			case 4:
 				entrar=0;
 				break;
 			case 5:
-				inicializa(hashFile);
+				printf("Tem certeza que deseja reinicializar a tabela hash?\n");
+				scanf("%d",&cod);
+				if(cod==1) inicializa(hashFile);
 				break;
 			default:
 				printf("caso invalido tente novamente\n");

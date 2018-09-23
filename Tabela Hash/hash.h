@@ -15,3 +15,7 @@ int hash(int);
 void inicializa(FILE*);
 
 void insere(cliente*,FILE*,FILE*);
+
+//busca o codigo na tabela hash, retorna -1 se não existe e retorna um inteiro com o endereço dele na tabela.
+int busca_cod(int ,FILE*,FILE*);
+void busca(int,FILE*,FILE*);

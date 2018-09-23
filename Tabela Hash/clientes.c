@@ -53,7 +53,7 @@ void imprime_cliente(cliente* client)
     printf("%d\n", client->prox);
     printf("\nStatus do cliente: ");
     printf("%d\n", client->status);
-    printf("\n**********************************************\n");
+    printf("**********************************************\n");
 }
 void adiciona_cliente(cliente* client,FILE* out)
 {
@@ -107,4 +107,15 @@ int le_status(FILE* clientesDat){
 		//if(status == -1) puts("oi");
 
 	return status;
+}
+int le_codigo(FILE* clientesDat)
+{
+	int codigo = -1;
+
+	if(fread(&codigo,sizeof(int),1,clientesDat))
+	{
+		fseek(clientesDat,tamanho_cliente() - sizeof(int),SEEK_CUR);
+	}
+
+	return codigo;
 }

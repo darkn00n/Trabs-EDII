@@ -36,4 +36,5 @@ typedef struct Cliente
 
 //auxiliares:
 	int tamanho_cliente();
-	int le_status(FILE* );
+	int le_status(FILE*);
+	int le_codigo(FILE*);
