@@ -30,6 +30,8 @@ typedef struct Cliente
 //funções impressao:
 	void ler_clientes(FILE*);
 
+	void ler_hash(FILE*);
+
 	cliente* le_cliente(FILE*);
 
 	void imprime_cliente(cliente*);

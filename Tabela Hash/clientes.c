@@ -66,12 +66,6 @@ void adiciona_cliente(cliente* client,FILE* out)
     free(client);
     fflush(out);
 }
-void altera_status(FILE* file)
-{
-	int status = 1;
-	fseek(file,tamanho_cliente() - sizeof(int),SEEK_CUR);//coloca o ponteiro para escrever no status
-	fwrite(&status,sizeof(int),1,file);//sobrescreve o status com true para dizer que pode escrever nessa posição
-}
 int tamanho_cliente()
 {
 	return sizeof(int)  //cod
@@ -118,4 +112,25 @@ int le_codigo(FILE* clientesDat)
 	}
 
 	return codigo;
+}
+void remove_cliente(FILE* clientesDat)
+{
+	int status = 1;//me diz que o status é 1 e o cliente pode ser removido.
+	fseek(clientesDat,tamanho_cliente() - sizeof(int),SEEK_CUR);//coloca o ponteiro para escrever no status
+	fwrite(&status,sizeof(int),1,clientesDat);//sobrescreve o status com true para dizer que pode escrever nessa posição
+}
+
+void ler_hash(FILE* hash)
+{
+	rewind(hash);
+
+	int aux = -1;
+
+	printf("********************************************\n");
+	for (int i = 0;i<7; i++)
+	{
+		fread(&aux,sizeof(int),1,hash);
+		printf("hash posição %d = %d\n",i,aux);
+	}
+	printf("********************************************\n");
 }

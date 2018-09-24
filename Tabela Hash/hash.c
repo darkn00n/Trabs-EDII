@@ -129,6 +129,61 @@ void busca(int codigo,FILE* tabHash,FILE* clientesDat)
 	else printf("\nO cliente procurado não existe\n\n");
 }
 
+void Remove(int codigo,FILE* tabHash,FILE* clientesDat)
+{
+	int onde = busca_cod(codigo,tabHash,clientesDat);//me pega o endereco de onde está o cliente a ser removido.
+	int listFirst;//utilizado para saber se é o primeiro da lista
+	cliente* temp;//temprario para pegar cliente e alterar os ponteiros
+	cliente* remover;//o cliente que sera removido esta aqui.
+	int sobreescrever;//me indica o endereco do cliente a ser reescrito pq os ponteiros foram alterados.]
+	int cursor;//me diz onde pegar o valor na tabela hash;
+	if(onde != -1)
+	{
+		cursor = sizeof(int)*hash(codigo);//calcula qual local da hash vai ficar o cliente
+		fseek(tabHash,cursor,SEEK_SET);//prepara o ponteiro para ler o que tem na hash
+		fread(&listFirst,sizeof(int),1,tabHash);//le a hash
+
+		fseek(clientesDat,onde*tamanho_cliente(),SEEK_SET);//vai no cliente encontrado
+		remove_cliente(clientesDat);//altera status para 1;
+
+		fseek(clientesDat,onde*tamanho_cliente(),SEEK_SET);//vai no cliente encontrado
+		remover = le_cliente(clientesDat);//pega o cliente que sera removido
+		printf("odne :%d\n",onde);
+		printf("fist: %d\n",listFirst);
+		if(onde == listFirst)
+		{
+			listFirst = remover->prox;
+			fseek(tabHash,cursor,SEEK_SET);//prepara o ponteiro para ler o que tem na hash
+			fwrite(&listFirst,sizeof(int),1,tabHash);
+		}
+		else
+		{
+			fseek(clientesDat,listFirst*tamanho_cliente(),SEEK_SET);//vai no 1 da lista do removido
+			temp = le_cliente(clientesDat);
+			sobreescrever = listFirst;
+			printf("quem é ?%d\n",temp->codCliente);
+			while(temp->prox != -1)
+			{
+				if(temp->prox == onde)
+				{
+					temp->prox = remover->prox;
+					printf("prox:%d\n",remover->prox);
+					break;
+				}
+				else
+				{
+					fseek(clientesDat,temp->prox*tamanho_cliente(),SEEK_SET);//vai no 1 da lista do removido
+					sobreescrever = temp->prox; 
+					temp = le_cliente(clientesDat);
+				}
+			}
+			fseek(clientesDat,sobreescrever*tamanho_cliente(),SEEK_SET);//vai no 1 da lista do removido
+			adiciona_cliente(temp,clientesDat);
+		}
+
+	}
+	else printf("\nO cliente procurado não existe\n\n");
+}
 
 
 

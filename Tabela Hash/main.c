@@ -14,7 +14,7 @@ int main()
 
 	while(entrar)
 	{
-		printf("1 para registrar um cliente\n2 para ver clientes\n3 para pesquisar um cliente\n4 para sair do programa\n");
+		printf("1 para registrar um cliente\n2 para ver clientes\n3 para ver a tabela hash\n4 para remover um cliente\n5 para pesquisar um cliente\n6 para sair do programa\n7 para iniciar a tabela hash\n");
 		scanf("%d",&acao);
 		getchar();
 		switch(acao)
@@ -26,14 +26,22 @@ int main()
 				ler_clientes(clientes);
 				break;
 			case 3:
+				ler_hash(hashFile);
+				break;
+			case 4:
+				printf("Digite o codigo do cliente a ser removido.\n");
+				scanf("%d",&cod);
+				Remove(cod,hashFile,clientes);
+				break;
+			case 5:
 				printf("Digite o codigo a ser buscado.\n");
 				scanf("%d",&cod);
 				busca(cod,hashFile,clientes);
+				break;	
+			case 6:
+				entrar=0;	
 				break;
-			case 4:
-				entrar=0;
-				break;
-			case 5:
+			case 7:
 				printf("Tem certeza que deseja reinicializar a tabela hash?\n");
 				scanf("%d",&cod);
 				if(cod==1) inicializa(hashFile);
