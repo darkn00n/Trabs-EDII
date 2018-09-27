@@ -6,6 +6,8 @@
 //Douglas Custodio de Araujo
 //Jose Lucas Alves gomes
 
+cliente *interador;//percorre a lista para verificar o codigo e me indica o final da lista 
+
 int hash(int codigo){
 
 	return codigo % M;
@@ -17,13 +19,17 @@ void inicializa(FILE* hashFile){
 	for(int i=0;i<M;i++){
 		fwrite(&menosUm, sizeof(int), 1, hashFile);
 	}
+	remove("clientes.dat");
+	FILE* aux = fopen("clientes.dat","w+b");
+	fclose(aux);
 }
 //insere o cliente na tabela hash resetando todos os valores nescessarios.
 void insere(cliente* cliente,FILE* tabHash,FILE* clientesDat){
+
 	int cursor; // cursor para posicionar na tabHash
 	int listFirst; // para verificar se na posicao achada ja tem uma lista ou esta vazia
 	int posicao = 0; // contabiliza quantos registros foram lidos para atualizar tabela Hash
-	int temp = 0;//me diz o status do cliente lido.
+	int temp = 0;//me diz o status do cliente lido
 
 	cursor = sizeof(int)*hash(cliente->codCliente);//calcula qual local da hash vai ficar o cliente
 
@@ -53,13 +59,39 @@ void insere(cliente* cliente,FILE* tabHash,FILE* clientesDat){
 
 			adiciona_cliente(cliente,clientesDat);//escrevo o cliente no final do arquivou ou em cima de um vazio.
 		}
+
+		fseek(tabHash,cursor,SEEK_SET);
+		fwrite(&posicao,sizeof(int),1,tabHash);
 	}
 	else{//se ja tem um cara com esse codigo, logo, existe colisao
-		cliente->prox = listFirst;//adiciona o ponteiro do novo cliente para o inicio da lista
+		
+		fseek(clientesDat,tamanho_cliente()*listFirst,SEEK_SET);
+		interador = le_cliente(clientesDat);
+		if(interador->codCliente == cliente->codCliente)
+		{
+			printf("Erro na insercao o codigo: %d já existe\n",interador->codCliente);
+			return;
+		}
+		int ultimo = listFirst;//me diz o ultimo cliente da lista
+		while(interador->prox != -1)
+		{
+			ultimo = interador->prox;
+			fseek(clientesDat,tamanho_cliente()*interador->prox,SEEK_SET);
+			interador = le_cliente(clientesDat);
+
+			if(interador->codCliente == cliente->codCliente)
+			{
+				printf("Erro na insercao o codigo: %d já existe\n",interador->codCliente);
+				return;
+			}
+		}
+
+		rewind(clientesDat);
 		//o restante é igual ao caso acima.
 		temp = le_status(clientesDat);
 
 		if(temp == -1){
+			
 			adiciona_cliente(cliente,clientesDat);
 		}
 		else{
@@ -70,12 +102,11 @@ void insere(cliente* cliente,FILE* tabHash,FILE* clientesDat){
 			if(temp == 1) fseek(clientesDat,-tamanho_cliente(),SEEK_CUR);
 
 			adiciona_cliente(cliente,clientesDat);
-		}	
+		}
+		interador->prox = posicao;//coloca o ponteiro do ultimo para apontar para o novo vliente
+		fseek(clientesDat,ultimo*tamanho_cliente(),SEEK_SET);//coloca o ponteiro do arquivo para o ultimo
+		adiciona_cliente(interador,clientesDat);//atualiza o valor do ultimo no arquivo.
 	}
-
-	fseek(tabHash,cursor,SEEK_SET);
-
-	fwrite(&posicao,sizeof(int),1,tabHash);
 
 	//fflush(tabHash);
 	//fflush(clientesDat);
@@ -148,8 +179,6 @@ void Remove(int codigo,FILE* tabHash,FILE* clientesDat)
 
 		fseek(clientesDat,onde*tamanho_cliente(),SEEK_SET);//vai no cliente encontrado
 		remover = le_cliente(clientesDat);//pega o cliente que sera removido
-		printf("odne :%d\n",onde);
-		printf("fist: %d\n",listFirst);
 		if(onde == listFirst)
 		{
 			listFirst = remover->prox;
@@ -161,13 +190,11 @@ void Remove(int codigo,FILE* tabHash,FILE* clientesDat)
 			fseek(clientesDat,listFirst*tamanho_cliente(),SEEK_SET);//vai no 1 da lista do removido
 			temp = le_cliente(clientesDat);
 			sobreescrever = listFirst;
-			printf("quem é ?%d\n",temp->codCliente);
 			while(temp->prox != -1)
 			{
 				if(temp->prox == onde)
 				{
 					temp->prox = remover->prox;
-					printf("prox:%d\n",remover->prox);
 					break;
 				}
 				else
